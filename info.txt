@@ -1,0 +1,41 @@
+serverport = 6666
+
+the server is logged in with a limited user.
+
+when client connects to server fork server and handle client in child and wait for next client in parent...
+save all child pid in list and close them if server shutdown...
+maybe make event handler to receive closing of childs...
+
+main fork:    waits for new clients and forks and handle client
+client forks: handle the connected client and prevents connection timeout
+              closes when connection is closed
+logdaemon:    writes all incoming messages into a logfile (maybe udp)
+              or filedescriptor...
+
+
+
+clienfork waits for incoming messages:
+from server:
+ -> notifytextmessage...
+
+from client:
+ -> nickname...
+ <- error id=0 msg=ok
+ 
+ -> clientlist
+ <- ..........
+ <- error id=0 msg=ok
+ 
+ -> msg...
+ <- error id=0 msg=ok
+ 
+ -> poke...
+ <- error id=0 msg=ok
+ 
+ 
+program parts:
+
+- main (starts the server)
+- listen_server (waits for new clients and saves the pid's...)
+- handle_client (handles one client and exits when connection closed)
+
