@@ -11,7 +11,6 @@ typedef struct {
 extern void xor_crypt(void * buffer, size_t length);
 extern char * base64encode(const void * databuf, size_t datalen);
 extern binarydata base64decode(const char * databuf);
-extern void * crypt(const void * data, size_t len);
 
 //for extern usage:
 //binarydata encryptionkey = { NULL, 0 };
