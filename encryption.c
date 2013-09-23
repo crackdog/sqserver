@@ -154,8 +154,10 @@ char * base64encode(const void * databuf, size_t datalen)
   uint8_t x0, x1, x2, x3;
   uint32_t x;
   
+  //datalen--;
+  
   data = (const uint8_t *) databuf;
-  resultlen = (((datalen + (datalen % 3)) * 4) / 3) + 1;
+  resultlen = (((datalen + (datalen % 3)) / 3) * 4) + 1;
   
   result = (char *) malloc(resultlen * sizeof(char));
   
@@ -209,8 +211,10 @@ binarydata base64decode(const char * databuf)
 {
   binarydata result;
   size_t i, j, padc, databuflen;
-  uint32_t x;
-  char y, buffer;
+  uint32_t x, buffer;
+  char y;
+  
+  int xyz;
   
   databuflen = strlen(databuf);
   
@@ -225,14 +229,19 @@ binarydata base64decode(const char * databuf)
   }
   
   result.len = ((strlen(databuf) * 3) / 4) - padc;
+  result.len = strlen(databuf);
   result.data = (uint8_t *) malloc(result.len * sizeof(uint8_t));
   
   x = 0;
   buffer = 1;
+  xyz = 0;
   
   for(i = 0, j = 0; i < databuflen; i++)
   {
     y = decodeb64[databuf[i]];
+    
+    //printf("i = %i : ", (int) i);
+    
     switch(y)
     {
       case INVALID:
@@ -241,18 +250,35 @@ binarydata base64decode(const char * databuf)
         return result;
       case EQUAL:
         i = databuflen;
+        while(j < result.len)
+        {
+          result.data[j++] = '\0';
+        }
         break;
       case WHITESPACE:  
         continue;
       default:
-        buffer = buffer << 6 | y;
-        if(buffer & 0x1000000)
+        buffer = (buffer << 6);
+        //printf("buffer = %x , y = %x\n", buffer, y);
+        buffer |= y;
+        //if(buffer & 0x1000000)
+        if(xyz < 4)
         {
           result.data[j++] = (buffer >> 16) & 0xff;
           result.data[j++] = (buffer >> 8) & 0xff;
           result.data[j++] = buffer & 0xff;
+          
+          //printf("%x\n", buffer & 0x1000000);
+          
           buffer = 1;
+          xyz = 0;
         }
+        else
+        {
+          xyz++;
+        }
+        
+        //printf("%i '%c' buffer = %x\n", y, databuf[i], (int) buffer);
     }
   }
   
@@ -266,6 +292,71 @@ binarydata base64decode(const char * databuf)
     result.data[j++] = (buffer >> 4) & 0xff;
   }
   
+  //printf("\n");
+  
+  //base64decodeinet(databuf, strlen(databuf), (unsigned char *) result.data, result.len);
+  
   return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int base64decodeinet(char *in, size_t inLen, unsigned char *out, size_t *outLen) { 
+    char *end = in + inLen;
+    size_t buf = 1, len = 0;
+ 
+    while (in < end) {
+        unsigned char c = decodeb64[*in++];
+ 
+        switch (c) {
+        case WHITESPACE: continue;   /* skip whitespace */
+        case INVALID:    return 1;   /* invalid input, return error */
+        case EQUAL:                 /* pad character, end of data */
+            in = end;
+            continue;
+        default:
+            buf = buf << 6 | c;
+ 
+            /* If the buffer is full, split it into bytes */
+            if (buf & 0x1000000) {
+                if ((len += 3) > *outLen) return 1; /* buffer overflow */
+                *out++ = buf >> 16;
+                *out++ = buf >> 8;
+                *out++ = buf;
+                buf = 1;
+            }   
+        }
+    }
+ 
+    if (buf & 0x40000) {
+        if ((len += 2) > *outLen) return 1; /* buffer overflow */
+        *out++ = buf >> 10;
+        *out++ = buf >> 2;
+    }
+    else if (buf & 0x1000) {
+        if (++len > *outLen) return 1; /* buffer overflow */
+        *out++ = buf >> 4;
+    }
+ 
+    *outLen = len; /* modify to reflect the actual output size */
+    return 0;
 }
 

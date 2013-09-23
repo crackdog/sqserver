@@ -8,6 +8,7 @@ GIT = $(SRC) $(HDR) Makefile info.txt README.md
 DEP = .dep.mk
 LOGDIR = logs/
 
+
 all: $(PROG)
 
 $(PROG): $(OBJ) $(DEP)
