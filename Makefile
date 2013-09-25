@@ -24,9 +24,6 @@ dep: $(DEP)
 	
 -include $(DEP)
 
-#git: $(GIT)
-#	git add $(GIT)
-
 .PHONY: addgit
 addgit:
 	git add $(GIT)
@@ -34,4 +31,3 @@ addgit:
 .PHONY: clean
 clean:
 	rm -rf $(OBJ) $(PROG) $(DEP) $(LOGDIR)
-	
