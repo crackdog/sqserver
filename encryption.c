@@ -294,69 +294,6 @@ binarydata base64decode(const char * databuf)
   
   //printf("\n");
   
-  //base64decodeinet(databuf, strlen(databuf), (unsigned char *) result.data, result.len);
-  
   return result;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int base64decodeinet(char *in, size_t inLen, unsigned char *out, size_t *outLen) { 
-    char *end = in + inLen;
-    size_t buf = 1, len = 0;
- 
-    while (in < end) {
-        unsigned char c = decodeb64[*in++];
- 
-        switch (c) {
-        case WHITESPACE: continue;   /* skip whitespace */
-        case INVALID:    return 1;   /* invalid input, return error */
-        case EQUAL:                 /* pad character, end of data */
-            in = end;
-            continue;
-        default:
-            buf = buf << 6 | c;
- 
-            /* If the buffer is full, split it into bytes */
-            if (buf & 0x1000000) {
-                if ((len += 3) > *outLen) return 1; /* buffer overflow */
-                *out++ = buf >> 16;
-                *out++ = buf >> 8;
-                *out++ = buf;
-                buf = 1;
-            }   
-        }
-    }
- 
-    if (buf & 0x40000) {
-        if ((len += 2) > *outLen) return 1; /* buffer overflow */
-        *out++ = buf >> 10;
-        *out++ = buf >> 2;
-    }
-    else if (buf & 0x1000) {
-        if (++len > *outLen) return 1; /* buffer overflow */
-        *out++ = buf >> 4;
-    }
- 
-    *outLen = len; /* modify to reflect the actual output size */
-    return 0;
 }
 
