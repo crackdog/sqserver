@@ -123,19 +123,7 @@ char * decrypt_msg(const char * encrypted_msg)
   
   xor_crypt(msg, msglen-1);
   
-  printdebug(msg);
-  
   return msg;
-}
-
-printdebug(const char * string)
-{
-  size_t i;
-  for(i = 0; i < strlen(string); i++)
-  {
-    printf("'%c' (%x) - ", string[i], (unsigned char) string[i]);
-  }
-  printf("\n");
 }
 
 void xor_crypt(void * buffer, size_t length)
@@ -216,8 +204,6 @@ char * base64encode(const void * databuf, size_t datalen)
     }
   }
   
-  printf(" '%i' datalen", (unsigned int) datalen);
-  
   result[j] = '\0';
   return result;
 }
@@ -226,7 +212,7 @@ binarydata base64decode(const char * databuf)
 {
   binarydata result;
   uint8_t * buffer;
-  size_t datalen;
+  size_t datalen, padcount;
   size_t dataindex, bufferindex;
   uint32_t x;
   uint8_t nextByte;
@@ -236,21 +222,25 @@ binarydata base64decode(const char * databuf)
   
   buffer = (uint8_t *) malloc(datalen);
   
+  padcount = 0;
+  
   for(dataindex = 0, i = 0, bufferindex = 0, x = 0; dataindex < datalen; dataindex++)
   {
     nextByte = decodeb64[databuf[dataindex]];
     
     if(nextByte == INVALID)
     {
-      printf("invalid: '%c' (%i)\n", databuf[dataindex], databuf[dataindex]);
-      continue;
+      //printf("invalid: '%c' (%i)\n", databuf[dataindex], databuf[dataindex]);
+      //continue;
+      exit(1337);
     }
     
     if(nextByte != WHITESPACE)
     {
-      if(nextByte == EQUAL)
+      if(nextByte == EQUAL || databuf[dataindex] == '=')
       {
         nextByte = 0x0;
+        padcount++;
       }
       
       x <<= 6;
@@ -270,15 +260,15 @@ binarydata base64decode(const char * databuf)
     }
   }
   
-  buffer[bufferindex++] = '\0';
+  bufferindex -= padcount;
+  
+  buffer[bufferindex] = '\0';
   
   result.len = bufferindex;
   result.data = malloc(result.len);
   memcpy(result.data, buffer, result.len);
   
   free(buffer);
-  
-  printf(" '%i' datalen", (unsigned int) result.len);
   
   return result;
 }
