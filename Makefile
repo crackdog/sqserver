@@ -1,5 +1,5 @@
 CC = gcc 
-CFLAGS = -O2 #-Wall -Wextra
+CFLAGS = #-O2 #-Wall -Wextra
 PROG = sqserver
 SRC = main.c daemon.c encryption.c param.c server.c log.c
 HDR = sqserver.h daemon.h encryption.h param.h server.h log.h #$(SRC:%.c=%.h)
