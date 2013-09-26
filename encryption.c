@@ -7,7 +7,7 @@ static binarydata key = {NULL, 0};
 const char base64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static const unsigned char decodeb64[] = {
-    66,66,66,66,66,66,66,66,66,64,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,
+    66,66,66,66,66,66,66,66,66,64,64,66,66,66,66,66,66,66,66,66,66,66,66,66,66,
     66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,62,66,66,66,63,52,53,
     54,55,56,57,58,59,60,61,66,66,66,65,66,66,66, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
     10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,66,66,66,66,66,66,26,27,28,
@@ -122,7 +122,20 @@ char * decrypt_msg(const char * encrypted_msg)
   free(cryptmsg.data);
   
   xor_crypt(msg, msglen-1);
+  
+  printdebug(msg);
+  
   return msg;
+}
+
+printdebug(const char * string)
+{
+  size_t i;
+  for(i = 0; i < strlen(string); i++)
+  {
+    printf("'%c' (%x) - ", string[i], (unsigned char) string[i]);
+  }
+  printf("\n");
 }
 
 void xor_crypt(void * buffer, size_t length)
@@ -203,6 +216,8 @@ char * base64encode(const void * databuf, size_t datalen)
     }
   }
   
+  printf(" '%i' datalen", (unsigned int) datalen);
+  
   result[j] = '\0';
   return result;
 }
@@ -227,9 +242,8 @@ binarydata base64decode(const char * databuf)
     
     if(nextByte == INVALID)
     {
-      result.len = 0;
-      result.data = NULL;
-      return result;
+      printf("invalid: '%c' (%i)\n", databuf[dataindex], databuf[dataindex]);
+      continue;
     }
     
     if(nextByte != WHITESPACE)
@@ -263,6 +277,8 @@ binarydata base64decode(const char * databuf)
   memcpy(result.data, buffer, result.len);
   
   free(buffer);
+  
+  printf(" '%i' datalen", (unsigned int) result.len);
   
   return result;
 }
