@@ -95,11 +95,11 @@ char * encrypt_msg(const char * msg)
   
   msglen = strlen(msg) + 1;
   
-  tmpmsg = (char *) malloc(msglen * sizeof(char));
+  tmpmsg = (char *) malloc(msglen);
   strncpy(tmpmsg, msg, msglen);
   tmpmsg[msglen-1] = '\0';
   
-  xor_crypt(tmpmsg, msglen-1);
+  xor_crypt(tmpmsg, msglen);
   retmsg = base64encode(tmpmsg, msglen);
   free(tmpmsg);
   
@@ -114,14 +114,14 @@ char * decrypt_msg(const char * encrypted_msg)
   
   cryptmsg = base64decode(encrypted_msg);
   
-  msglen = cryptmsg.len + 1;
-  msg = (char *) malloc(msglen * sizeof(char));
+  msglen = cryptmsg.len;
+  msg = (char *) malloc(msglen + 1);
   memcpy(msg, cryptmsg.data, cryptmsg.len);
-  msg[msglen-1] = '\0';
+  msg[msglen] = '\0';
   
   free(cryptmsg.data);
   
-  xor_crypt(msg, msglen-1);
+  xor_crypt(msg, msglen);
   
   return msg;
 }
@@ -272,96 +272,4 @@ binarydata base64decode(const char * databuf)
   
   return result;
 }
-      
-    
-
-/*binarydata base64decode(const char * databuf)
-{
-  binarydata result;
-  size_t i, j, padc, databuflen;
-  uint32_t x, buffer;
-  char y;
-  
-  int xyz;
-  
-  databuflen = strlen(databuf);
-  
-  padc = 0;
-  if(databuf[databuflen-1] == '=')
-  {
-    padc++;
-    if(databuf[databuflen-2] == '=')
-    {
-      padc++;
-    }
-  }
-  
-  result.len = ((strlen(databuf) * 3) / 4) - padc;
-  result.len = strlen(databuf);
-  result.data = (uint8_t *) malloc(result.len * sizeof(uint8_t));
-  
-  x = 0;
-  buffer = 1;
-  xyz = 0;
-  
-  for(i = 0, j = 0; i < databuflen; i++)
-  {
-    y = decodeb64[databuf[i]];
-    
-    //printf("i = %i : ", (int) i);
-    
-    switch(y)
-    {
-      case INVALID:
-        result.data = NULL;
-        result.len = 0;
-        return result;
-      case EQUAL:
-        i = databuflen;
-        while(j < result.len)
-        {
-          result.data[j++] = '\0';
-        }
-        break;
-      case WHITESPACE:  
-        continue;
-      default:
-        buffer = (buffer << 6);
-        //printf("buffer = %x , y = %x\n", buffer, y);
-        buffer |= y;
-        //if(buffer & 0x1000000)
-        if(xyz < 4)
-        {
-          result.data[j++] = (buffer >> 16) & 0xff;
-          result.data[j++] = (buffer >> 8) & 0xff;
-          result.data[j++] = buffer & 0xff;
-          
-          //printf("%x\n", buffer & 0x1000000);
-          
-          buffer = 1;
-          xyz = 0;
-        }
-        else
-        {
-          xyz++;
-        }
-        
-        //printf("%i '%c' buffer = %x\n", y, databuf[i], (int) buffer);
-    }
-  }
-  
-  if(buffer & 0x40000)
-  {
-    result.data[j++] = (buffer >> 10) & 0xff;
-    result.data[j++] = (buffer >> 2) & 0xff;
-  }
-  else if(buffer & 0x1000)
-  {
-    result.data[j++] = (buffer >> 4) & 0xff;
-  }
-  
-  //printf("\n");
-  
-  return result;
-}*/
 

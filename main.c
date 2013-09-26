@@ -29,7 +29,7 @@ int main(int argc, const char * argv[])
       {
         if(fgets(buffer, BUF_SIZE, stdin) == 0)
           break;
-        buffer[strlen(buffer)-1] = '\0';
+        buffer[strlen(buffer)] = '\0';
         printf("%s\n", encrypt_msg(buffer));
       }
       
