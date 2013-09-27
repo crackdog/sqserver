@@ -65,7 +65,7 @@ case "$1" in
               then 
                 if (kill -0 $(cat $PIDFILE) 2> /dev/null );
                   then
-                    echo "server is already running"
+                    echo 'server is already running'
                   else
                     rm -f $PIDFILE
                     start
@@ -80,11 +80,11 @@ case "$1" in
                   then
                     stop
                   else
-                    echo "server is not running"
+                    echo 'server is not running'
                     rm -f $PIDFILE
                 fi
               else
-                echo "server is not running"
+                echo 'server is not running'
             fi
             ;;
   restart)  $0 stop && $0 start
@@ -93,13 +93,13 @@ case "$1" in
               then
                 if (kill -0 $(cat $PIDFILE) 2> /dev/null );
                   then
-                    echo "server is running"
+                    echo 'server is running'
                   else
-                    echo "server is not running"
+                    echo 'server is not running'
                     rm -f $PIDFILE
                 fi
               else
-                echo "---"
+                echo 'server is not running'
             fi
             ;;
 esac
