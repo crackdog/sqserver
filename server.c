@@ -2,7 +2,7 @@
 #include "server.h"
 #include "log.h"
 
-int serverSocket, clientSocket;;
+int serverSocket, clientSocket, ts3Socket;
 
 int start_server()
 {
@@ -42,8 +42,6 @@ int start_server()
         //handle client...
         
         serverlog("handle_client();");
-        
-        //if(write(clientSocket, "test\n", strlen("test\n")) == 0)
         
         int retvalue;
         retvalue = handle_client();
@@ -110,6 +108,98 @@ void terminate_server()
 
 int handle_client()
 {
+  fd_set fds;
+  int max;
+  boolean running;
+  
+  //ts3Socket initialisieren...
+  ts3Socket = connectToTS3Server(TS3_SERVER_PORT);
+  clientLogin(ts3Socket);
+  
+  running = TRUE;
+  
+  while(running)
+  {    
+    //init select...  
+    FD_ZERO(&fds);
+    FD_SET(clientSocket, &fds);
+    FD_SET(ts3Socket, &fds);
+    max = (clientSocket > ts3Socket ? clientSocket : ts3Socket) + 1;
+    
+    
+    //select...
+    
+    //handle current msg...
+    
+    running = FALSE;
+  }
+
   return 0;
+}
+
+int connectToTS3Server(unsigned int port)
+{
+    int s;
+    struct hostent *host;
+    struct sockaddr_in addr;
+
+    if (!inet_aton("localhost", &addr.sin_addr))
+    {
+        host = gethostbyname("localhost");
+        if (!host)
+        {
+            return -1;
+        }
+        addr.sin_addr = *(struct in_addr*)host->h_addr;
+    }
+
+    s = socket(PF_INET, SOCK_STREAM, 0);
+    if (s == -1)
+    {
+        return -1;
+    }
+
+    addr.sin_port = htons(port);
+    addr.sin_family = AF_INET;
+
+    if (connect(s, (struct sockaddr*)&addr, sizeof(addr)) == -1)
+    {
+        return -1;
+    }
+
+    return s;
+}
+
+void clientLogin(int sock)
+{
+  FILE * clfile;
+  char * buffer;
+  
+  buffer = (char *) malloc(BUF_SIZE);
+  
+  clfile = fopen(CLOGINFILENAME, "r");
+  if(clfile == NULL)
+  {
+    strncpy(buffer, "~/sqserver/conf/", BUF_SIZE);
+    strncat(buffer, CLOGINFILENAME, BUF_SIZE - strlen(buffer));
+    clfile = fopen(buffer, "r");
+    if(clfile == NULL)
+    {
+      //error
+      exit(666);
+    }
+  }
+  
+  while(!feof(clfile))
+  {
+    if(fgets(buffer, BUF_SIZE, clfile) != NULL)
+    {
+      write(sock, buffer, strlen(buffer) + 1); //maybe without '+1'
+    }
+  }
+  
+  fclose(clfile);
+  
+  return;
 }
 

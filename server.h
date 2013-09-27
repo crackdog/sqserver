@@ -4,6 +4,8 @@
 //private
 extern int init_server_socket(int local_port);
 extern int handle_client();
+extern int connectToTS3Server(unsigned int port);
+extern void clientLogin(int sock);
 
 //public
 extern int start_server(void);

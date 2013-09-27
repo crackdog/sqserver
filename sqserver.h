@@ -24,10 +24,11 @@
 #define BUF_SIZE        4096
 #define TS3_SERVER_PORT 10011
 #define SERVER_PORT     6666
+#define CLOGINFILENAME  "clientlogin.conf"
 //************************
 
 //++++++++++++++++++++++++
-//typedefs
+//typedefs:
 typedef int boolean;
 //++++++++++++++++++++++++
 
