@@ -42,11 +42,16 @@ int start_server()
         //handle client...
         
         serverlog("handle_client();");
-        if(write(clientSocket, "test\n", strlen("test\n")) == 0)
-          
+        
+        //if(write(clientSocket, "test\n", strlen("test\n")) == 0)
+        
+        int retvalue;
+        retvalue = handle_client();
+        
+        close(clientSocket);
         
         terminate_log();
-        exit(0);
+        exit(retvalue);
       }
       else
       {
@@ -98,10 +103,13 @@ int init_server_socket(int local_port)
 
 void terminate_server()
 {
-  //serverlog("stopping server...");
-  
   close(serverSocket);
   close(clientSocket);
   serverlog("server stopped");
+}
+
+int handle_client()
+{
+  return 0;
 }
 

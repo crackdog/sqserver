@@ -3,7 +3,7 @@
 
 //private
 extern int init_server_socket(int local_port);
-
+extern int handle_client();
 
 //public
 extern int start_server(void);
