@@ -173,8 +173,12 @@ int handle_client()
       {
         //decrypt msg
         strncpy(msgbuffer, decrypt_msg(msgbuffer), BUF_SIZE);
-        //send to ts3 server
-        write(ts3Socket, msgbuffer, strlen(msgbuffer));
+        //check if msg is a allowed one
+        if(isAllowedMsg(msgbuffer))
+        {
+          //send to ts3 server
+          write(ts3Socket, msgbuffer, strlen(msgbuffer));
+        }
       }
     }
     else if(FD_ISSET(ts3Socket, &fds))
@@ -271,5 +275,28 @@ void clientLogin(int sock)
   fclose(clfile);
   
   return;
+}
+
+boolean isAllowedMsg(const char * msg)
+{
+  char * allowedmsg[] = 
+    {"clientlist", 
+    "sendtextmessage",
+    "pokeclient",
+    NULL};
+  int i;
+  boolean ret;
+  
+  i = 0;
+  ret = FALSE;
+  while(allowedmsg[i] != NULL)
+  {
+    if(strncmp(msg, allowedmsg[i], strlen(allowedmsg[i])) == 0)
+    {
+      ret = TRUE;
+    }
+  }
+  
+  return ret;
 }
 
