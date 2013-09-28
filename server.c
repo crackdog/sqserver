@@ -10,6 +10,9 @@ int start_server()
   socklen_t client_addr_len;
   struct sockaddr_in client_addr;
   pid_t pid;
+  int retvalue;
+  
+  retvalue = 0;
 
   serverlog("starting server...");
   
@@ -43,13 +46,13 @@ int start_server()
         
         serverlog("handle_client();");
         
-        int retvalue;
         retvalue = handle_client();
         
         close(clientSocket);
         
         terminate_log();
-        exit(retvalue);
+        //exit(retvalue);
+        running = FALSE;
       }
       else
       {
@@ -63,7 +66,7 @@ int start_server()
   }
   
   terminate_server();
-  return 0;
+  return retvalue;
 }
 
 int init_server_socket(int local_port)
@@ -103,23 +106,31 @@ void terminate_server()
 {
   close(serverSocket);
   close(clientSocket);
+  close(ts3Socket);
   serverlog("server stopped");
 }
 
 int handle_client()
 {
   fd_set fds;
-  int max;
+  int max, retvalue;
   boolean running;
   char * msgbuffer;
+  struct timeval timer;
     
   msgbuffer = (char *) malloc(BUF_SIZE);
   
   //ts3Socket initialisieren...
   ts3Socket = connectToTS3Server(TS3_SERVER_PORT);
+  if(ts3Socket == -1)
+  {
+    serverlog("couldn't connect to ts3 server");
+    return 2;
+  }
   clientLogin(ts3Socket);
   
   running = TRUE;
+  retvalue = 0;
   
   while(running)
   {    
@@ -129,8 +140,18 @@ int handle_client()
     FD_SET(ts3Socket, &fds);
     max = clientSocket > ts3Socket ? clientSocket : ts3Socket;
     
+    timer.tv_sec = 10;
+    timer.tv_usec = 0;
+    
     //select...
-    select(max + 1, &fds, NULL, NULL, NULL);
+    if(select(max + 1, &fds, NULL, NULL, &timer) == -1)
+    {
+      //error
+      serverlog("selecterror...quitting process");
+      retvalue = 1;
+      running = FALSE;
+      break;
+    }
     
     //handle current msg...
     if(FD_ISSET(clientSocket, &fds))
@@ -153,6 +174,8 @@ int handle_client()
       write(ts3Socket, msgbuffer, strlen(msgbuffer));
     }
   }
+  
+  close(ts3Socket);
 
   return 0;
 }
