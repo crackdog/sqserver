@@ -111,6 +111,9 @@ int handle_client()
   fd_set fds;
   int max;
   boolean running;
+  char * msgbuffer;
+    
+  msgbuffer = (char *) malloc(BUF_SIZE);
   
   //ts3Socket initialisieren...
   ts3Socket = connectToTS3Server(TS3_SERVER_PORT);
@@ -124,14 +127,31 @@ int handle_client()
     FD_ZERO(&fds);
     FD_SET(clientSocket, &fds);
     FD_SET(ts3Socket, &fds);
-    max = (clientSocket > ts3Socket ? clientSocket : ts3Socket) + 1;
-    
+    max = clientSocket > ts3Socket ? clientSocket : ts3Socket;
     
     //select...
+    select(max + 1, &fds, NULL, NULL, NULL);
     
     //handle current msg...
-    
-    running = FALSE;
+    if(FD_ISSET(clientSocket, &fds))
+    {
+      //handle client msg
+      //if empty msg running = false
+    }
+    else if(FD_ISSET(ts3Socket, &fds))
+    {
+      //handle ts3server msg
+      //read msg
+      //encrypt msg
+      //send msg
+      write(clientSocket, msgbuffer, strlen(msgbuffer));
+    }
+    else
+    {
+      //handle timer
+      strncpy(msgbuffer, "clientlist", BUF_SIZE);
+      write(ts3Socket, msgbuffer, strlen(msgbuffer));
+    }
   }
 
   return 0;
