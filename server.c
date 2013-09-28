@@ -1,6 +1,7 @@
 #include "sqserver.h"
 #include "server.h"
 #include "log.h"
+#include "encryption.h"
 
 int serverSocket, clientSocket, ts3Socket;
 
@@ -113,7 +114,7 @@ void terminate_server()
 int handle_client()
 {
   fd_set fds;
-  int max, retvalue;
+  int max, retvalue, bytes;
   boolean running;
   char * msgbuffer;
   struct timeval timer;
@@ -133,7 +134,10 @@ int handle_client()
   retvalue = 0;
   
   while(running)
-  {    
+  {
+    //init buffer
+    memset(msgbuffer, '\0', BUF_SIZE);
+    
     //init select...  
     FD_ZERO(&fds);
     FD_SET(clientSocket, &fds);
@@ -157,13 +161,36 @@ int handle_client()
     if(FD_ISSET(clientSocket, &fds))
     {
       //handle client msg
-      //if empty msg running = false
+      bytes = read(clientSocket, msgbuffer, BUF_SIZE);
+      msgbuffer[bytes] = '\0';
+      //if msg is empty the connection is closed
+      if(bytes = 0)
+      {
+        serverlog("connection closed by client");
+        running = FALSE;
+      }
+      else
+      {
+        //decrypt msg
+        strncpy(msgbuffer, decrypt_msg(msgbuffer), BUF_SIZE);
+        //send to ts3 server
+        write(ts3Socket, msgbuffer, strlen(msgbuffer));
+      }
     }
     else if(FD_ISSET(ts3Socket, &fds))
     {
       //handle ts3server msg
       //read msg
+      bytes = read(clientSocket, msgbuffer, BUF_SIZE);
+      msgbuffer[bytes] = '\0';
+      //if msg is empty the connnection is closed
+      if(bytes == 0)
+      {
+        serverlog("connection to ts3 server is closed");
+        running = FALSE;
+      }
       //encrypt msg
+      strncpy(msgbuffer, encrypt_msg(msgbuffer), BUF_SIZE);
       //send msg
       write(clientSocket, msgbuffer, strlen(msgbuffer));
     }

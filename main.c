@@ -105,9 +105,9 @@ int main(int argc, const char * argv[])
       
       serverlog("server started");
       //sleep(60); //debug...
-      //returnvalue = start_server();
+      returnvalue = start_server();
       serverlog("server stopped");
-      //terminate_log();
+      terminate_log();
       break;
     }
     case NOPARAM:
