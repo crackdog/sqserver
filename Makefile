@@ -28,6 +28,11 @@ dep: $(DEP)
 addgit:
 	git add $(GIT)
 	
+.PHONY: clearlog
+clearlog:
+	rm -rf $(LOGDIR)
+
 .PHONY: clean
 clean:
-	rm -rf $(OBJ) $(PROG) $(DEP) $(LOGDIR)
+	rm -rf $(OBJ) $(PROG) $(DEP) $(LOGDIR) 
+
