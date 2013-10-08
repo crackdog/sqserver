@@ -4,42 +4,59 @@
 
 int timestamp = FALSE;
 FILE * logfile = NULL;
+char * logdir = NULL;
 
-void initserverlog(const char * logdir)
+void setlogdir(const char * logdirectory)
 {
-  char logfilename[256];
-  int i;
-  FILE * tmp;
+  logdir = (char *) malloc(strlen(logdirectory) + 1);
   
-  strncpy(logfilename, logdir, 256);
-  strncat(logfilename, "/sqserver.log", 256);
+  strncpy(logdir, logdirectory, strlen(logdirectory));
+}
 
-  logfile = fopen(logfilename, "w");
-
-  for(i = 0; i < 100; i++)
+void initlogfile(logtype lt)
+{
+  char * ln;
+  
+  if(lt == SERVER_LOG)
   {
-    snprintf(logfilename, 256, "%s/%i.log", logdir, i);
-    tmp = fopen(logfilename, "r");
-    if(tmp == NULL)
-    {
-      //fclose(tmp);
-      fprintf(logfile, "%s is not existing\n", logfilename);
-      break;
-    }
-    fclose(tmp);
+    ln = "server_log_";
+  }
+  else
+  {
+    ln = "client_log_";
   }
   
-  logfile = fopen(logfilename, "w");
+  if(logdir != NULL)
+  {
+    char logfilename[256];
+    int i;
+    FILE * tmp;
+    
+    for(i = 0; i < 100; i++)
+    {
+      snprintf(logfilename, 256, "%s/%s%i.log", logdir, ln, i);
+      tmp = fopen(logfilename, "r");
+      if(tmp == NULL)
+      {
+        break;
+      }
+    }
+    
+    logfile = fopen(logfilename, "w");
+  }
 }
 
 void serverlog(char * str)
 {
-  if(timestamp)
-    printctime();
-  
-  fprintf(logfile, "%s\n", str);
-  
-  fflush(logfile);
+  if(logfile != NULL)
+  {
+    if(timestamp)
+      printctime();
+    
+    fprintf(logfile, "%s\n", str);
+    
+    fflush(logfile);
+  }
 }
 
 void printctime()
@@ -64,27 +81,36 @@ void settimestamp(int t)
 
 void serverlogwi(char * str1, long x, char * str2)
 {
-  if(timestamp)
-    printctime();
-  
-  fprintf(logfile, "%s%li%s\n", str1, x, str2);
-  
-  fflush(logfile);
+  if(logfile != NULL)
+  {
+    if(timestamp)
+      printctime();
+    
+    fprintf(logfile, "%s%li%s\n", str1, x, str2);
+    
+    fflush(logfile);
+  }
 }
 
 void serverlogsigchld(pid_t pid, int exitstatus, int sig)
 {
-  if(timestamp)
-    printctime();
-  
-  fprintf(logfile, "process %d exited with %i and signal %i\n" , pid , exitstatus, sig);
-  
-  fflush(logfile);
+  if(logfile != NULL)
+  {
+    if(timestamp)
+      printctime();
+    
+    fprintf(logfile, "process %i exited with %i and signal %i\n" , (int) pid , exitstatus, sig);
+    
+    fflush(logfile);
+  }
 }
 
 void terminate_log()
 {
-  fflush(logfile);
-  fclose(logfile);
+  if(logfile != NULL)
+  {
+    fflush(logfile);
+    fclose(logfile);
+  }
 }
 

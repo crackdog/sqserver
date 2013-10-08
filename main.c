@@ -10,7 +10,7 @@ int main(int argc, const char * argv[])
   int returnvalue;
   
   settimestamp(TRUE);
-  set_sigchld_handler();  
+  set_sigchld_handler();
   
   returnvalue = 0;
   
@@ -96,12 +96,14 @@ int main(int argc, const char * argv[])
     
       if(argc > 2)
       {
-        initserverlog(argv[2]);
+        setlogdir(argv[2]);
       }
       else
       {
-        initserverlog("~/logs");
+        setlogdir("~/logs");
       }
+      
+      initlogfile(SERVER_LOG);
       
       serverlog("server started");
       //sleep(60); //debug...

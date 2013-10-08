@@ -30,6 +30,9 @@
 //++++++++++++++++++++++++
 //typedefs:
 typedef int boolean;
+typedef enum logfiletype 
+  { SERVER_LOG, CLIENT_LOG }
+  logtype;
 //++++++++++++++++++++++++
 
 #endif

@@ -50,7 +50,7 @@ int handle_client(int clientSocket, int ts3Socket)
       bytes = read(clientSocket, msgbuffer, BUF_SIZE);
       msgbuffer[bytes] = '\0';
       //if msg is empty the connection is closed
-      if(bytes = 0)
+      if(bytes == 0)
       {
         serverlog("connection closed by client");
         running = FALSE;

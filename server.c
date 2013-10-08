@@ -43,9 +43,12 @@ int start_server()
       if(pid == 0)
       {
         close(serverSocket);
+        terminate_log();
+        //initclientlog(); replaced by:
+        initlogfile(CLIENT_LOG);
         //handle client...
         
-        serverlog("handle_client();");
+        //serverlog("handle_client();");
         
         ts3Socket = connectToTS3Server(TS3_SERVER_PORT);
         if(ts3Socket == -1)
@@ -58,7 +61,6 @@ int start_server()
         
         close(clientSocket);
         
-        terminate_log();
         //exit(retvalue);
         running = FALSE;
       }
