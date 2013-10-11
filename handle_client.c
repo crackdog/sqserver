@@ -10,7 +10,7 @@ int handle_client(int clientSocket, int ts3Socket)
   boolean running;
   char * msgbuffer;
   struct timeval timer;
-    
+  
   msgbuffer = (char *) malloc(BUF_SIZE);
   
   //ts3Socket initialisieren...
@@ -19,8 +19,10 @@ int handle_client(int clientSocket, int ts3Socket)
   running = TRUE;
   retvalue = 0;
   
+  serverlogwi("running = ", running, "");
+  
   while(running)
-  {
+  {   
     //init buffer
     memset(msgbuffer, '\0', BUF_SIZE);
     
@@ -58,29 +60,32 @@ int handle_client(int clientSocket, int ts3Socket)
       else
       {
         //decrypt msg
-        strncpy(msgbuffer, decrypt_msg(msgbuffer), BUF_SIZE);
+/*        strncpy(msgbuffer, decrypt_msg(msgbuffer), BUF_SIZE);*/
         //check if msg is a allowed one
         if(isAllowedMsg(msgbuffer))
         {
           //send to ts3 server
           write(ts3Socket, msgbuffer, strlen(msgbuffer));
         }
+        strncat(msgbuffer, "'", BUF_SIZE);
+        write(clientSocket, msgbuffer, strlen(msgbuffer));
       }
     }
     else if(FD_ISSET(ts3Socket, &fds))
     {
       //handle ts3server msg
       //read msg
-      bytes = read(clientSocket, msgbuffer, BUF_SIZE);
+      bytes = read(ts3Socket, msgbuffer, BUF_SIZE);
       msgbuffer[bytes] = '\0';
       //if msg is empty the connnection is closed
       if(bytes == 0)
       {
-        serverlog("connection to ts3 server is closed");
-        running = FALSE;
+        //serverlog("connection to ts3 server is closed");
+        //running = FALSE;
+        continue;
       }
       //encrypt msg
-      strncpy(msgbuffer, encrypt_msg(msgbuffer), BUF_SIZE);
+/*      strncpy(msgbuffer, encrypt_msg(msgbuffer), BUF_SIZE);*/
       //send msg
       write(clientSocket, msgbuffer, strlen(msgbuffer));
     }
@@ -107,13 +112,23 @@ void clientLogin(int sock)
   clfile = fopen(CLOGINFILENAME, "r");
   if(clfile == NULL)
   {
-    strncpy(buffer, "~/sqserver/conf/", BUF_SIZE);
-    strncat(buffer, CLOGINFILENAME, BUF_SIZE - strlen(buffer));
+    if(getlogdir() != NULL)
+    {
+      strncpy(buffer, getlogdir(), BUF_SIZE);
+      strncat(buffer, "../conf/", BUF_SIZE);
+    }
+    else
+    {
+      strncpy(buffer, "~/sqserver/conf/", BUF_SIZE);
+    }
+    strncpy(buffer, "~/programming/sqserver/conf/", BUF_SIZE);
+    strncat(buffer, CLOGINFILENAME, BUF_SIZE);
     clfile = fopen(buffer, "r");
     if(clfile == NULL)
     {
       //error
-      exit(666);
+      //exit(666);
+      return;
     }
   }
   
@@ -121,7 +136,7 @@ void clientLogin(int sock)
   {
     if(fgets(buffer, BUF_SIZE, clfile) != NULL)
     {
-      write(sock, buffer, strlen(buffer) + 1); //maybe without '+1'
+      write(sock, buffer, strlen(buffer)); //maybe without '+1'
     }
   }
   
@@ -149,8 +164,9 @@ boolean isAllowedMsg(const char * msg)
     {
       ret = TRUE;
     }
+    i++;
   }
   
-  return ret;
+  return TRUE;//ret;
 }
 

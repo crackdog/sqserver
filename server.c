@@ -57,6 +57,8 @@ int start_server()
           return 2;
         }
         
+        //serverlog("test...");
+        
         retvalue = handle_client(clientSocket, ts3Socket);
         
         close(clientSocket);

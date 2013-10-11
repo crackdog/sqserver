@@ -13,6 +13,11 @@ void setlogdir(const char * logdirectory)
   strncpy(logdir, logdirectory, strlen(logdirectory));
 }
 
+const char * getlogdir()
+{
+  return logdir;
+}
+
 void initlogfile(logtype lt)
 {
   char * ln;
